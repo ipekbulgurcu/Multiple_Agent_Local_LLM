@@ -2,10 +2,10 @@
 
 **Yinov AI - Multi-Agent Assistant**, yerel LLM (Ollama) ve **LangGraph** kullanarak geliştirilmiş otonom bir yapay zeka sistemidir. Bu sistem, **Web Search**, **Python Code Execution** ve **Document RAG** yeteneklerini birleştirerek karmaşık soruları çözer.
 
-## 🚀 Proje Hakkında
+##  Proje Hakkında
 Bu proje, sadece doküman okuyan bir RAG sistemi değil, aynı zamanda internete çıkabilen, kod yazabilen ve kararlar alabilen bir **Multi-Agent (Çok Ajanlı)** sistemdir. Verileriniz tamamen **yerel makinenizde** işlenir.
 
-### 🌟 Öne Çıkan Özellikler
+###  Öne Çıkan Özellikler
 *   **Otonom Karar Verme (Router):** Supervisor (Yönetici), sorunun türüne göre hangi ajanı kullanacağına kendisi karar verir.
 *   **Multi-Model Stratejisi (Task-Specific):**
     *   **Hızlı Model (Fast LLM):** Yönlendirme ve basit kararlar için `phi3` veya `gemma` kullanır.
@@ -16,7 +16,7 @@ Bu proje, sadece doküman okuyan bir RAG sistemi değil, aynı zamanda internete
     *   Vector Store (Doküman Analizi)
 *   **LangGraph Orkestrasyonu:** Döngüsel (Cyclic) grafik yapısı sayesinde ajanlar birbirleriyle haberleşerek sorunu çözene kadar çalışır.
 
-## 🏗️ Mimari
+##  Mimari
 
 Sistem, merkezi bir **Supervisor** node ve ona bağlı uzman ("Worker") node'lardan oluşur:
 
@@ -25,7 +25,7 @@ Sistem, merkezi bir **Supervisor** node ve ona bağlı uzman ("Worker") node'lar
 3.  **Coder:** Matematiksel işlemler ve veri analizi için Python kodu yazar.
 4.  **RAG Expert:** Yüklenen dokümanlar üzerinde semantik arama yapar.
 
-## 🛠️ Kurulum Adımları
+##  Kurulum Adımları
 
 Projeyi çalıştırmak için aşağıdaki adımları takip edin.
 
@@ -69,8 +69,11 @@ uvicorn app.main:app --reload
 Uygulamanız **http://127.0.0.1:8000** adresinde yayında olacaktır.
 
 ---
+### Arayüz
+<img width="2868" height="1522" alt="llm" src="https://github.com/user-attachments/assets/1a6516d7-1b6f-4d58-bf81-d96610499320" />
 
-## 🧪 Testler
+
+##  Testler
 
 API'yi test etmek için `/ask` endpoint'ine şu JSON ile POST isteği atabilirsiniz:
 
