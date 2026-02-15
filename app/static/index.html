@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yinov AI - Multi-Agent Assistant</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+        rel="stylesheet" />
+
+    <style>
+        :root {
+            /* M3 Dark Theme Palette (Premium Deep Purple/Black) */
+            --md-sys-color-background: #141218;
+            --md-sys-color-on-background: #E6E1E5;
+            --md-sys-color-surface: #1D1B20;
+            --md-sys-color-surface-container: #211F26;
+            --md-sys-color-on-surface: #E6E1E5;
+
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
+
+            --md-sys-color-secondary: #CCC2DC;
+            --md-sys-color-on-secondary: #332D41;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+
+            --md-sys-color-error: #F2B8B5;
+            --md-sys-color-outline: #938F99;
+            --md-sys-color-outline-variant: #49454F;
+
+            --shape-corner-extra-large: 28px;
+            --shape-corner-large: 16px;
+            --shape-corner-medium: 12px;
+            --font-stack: 'Roboto', sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Layout --- */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            min-width: 320px;
+            /* Prevent squishing */
+            background-color: var(--md-sys-color-surface-container);
+            padding: 20px;
+            /* Slight reduction */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border-right: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .logo-icon {
+            color: var(--md-sys-color-primary);
+            font-size: 32px;
+        }
+
+        /* Upload Card */
+        .upload-card {
+            background-color: var(--md-sys-color-surface);
+            border: 2px dashed var(--md-sys-color-outline-variant);
+            border-radius: var(--shape-corner-large);
+            padding: 32px 20px;
+            /* More vertical padding */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            width: 100%;
+        }
+
+        .upload-card:hover,
+        .upload-card.drag-over {
+            border-color: var(--md-sys-color-primary);
+            background-color: rgba(208, 188, 255, 0.05);
+        }
+
+        .upload-icon-large {
+            font-size: 48px;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            display: block;
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--md-sys-color-outline);
+        }
+
+        /* Buttons */
+        .btn {
+            height: 40px;
+            border-radius: 20px;
+            border: none;
+            padding: 0 24px;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .btn-filled:hover {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08));
+        }
+
+        .btn-filled:disabled {
+            background-color: var(--md-sys-color-outline-variant);
+            color: var(--md-sys-color-outline);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Chat Area */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--md-sys-color-background);
+            position: relative;
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--md-sys-color-outline);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            /* Green for active */
+        }
+
+        .messages-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .avatar.user {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+
+        .message-content {
+            background-color: var(--md-sys-color-surface-container);
+            padding: 16px;
+            border-radius: var(--shape-corner-large);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--md-sys-color-on-surface);
+            white-space: pre-wrap;
+            /* Visualize newlines */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.user .message-content {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai .message-content {
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Input Area */
+        .input-container {
+            padding: 20px 24px 30px;
+            /* Extra bottom padding */
+            background-color: var(--md-sys-color-background);
+            max-width: 850px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .input-box {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            padding: 8px 8px 8px 24px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: border-color 0.2s;
+        }
+
+        .input-box:focus-within {
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+            outline: none;
+            padding: 8px 0;
+            font-family: inherit;
+        }
+
+        .send-btn-fab {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .send-btn-fab:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .send-btn-fab:disabled {
+            background-color: var(--md-sys-color-outline-variant);
+            color: var(--md-sys-color-outline);
+            cursor: default;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loaders */
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: var(--md-sys-color-on-surface);
+            border-radius: 50%;
+            animation: typing 1.4s infinite both;
+            margin: 0 2px;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Agents Logic Visualization (Optional) */
+        .agent-badge {
+            font-size: 11px;
+            background: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            display: inline-block;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <span class="material-symbols-rounded logo-icon">smart_toy</span>
+                <div style="display: flex; flex-direction: column; line-height: 1.1;">
+                    <span>Yinov Ai</span>
+                    <span
+                        style="font-size: 13px; font-weight: 400; color: var(--md-sys-color-outline); margin-top: 2px;">by
+                        İpek Bulgurcu</span>
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="upload-area">
+                <label for="file-upload" class="upload-card" id="drop-zone">
+                    <span class="material-symbols-rounded upload-icon-large">cloud_upload</span>
+                    <strong style="display: block; font-size: 16px;">Upload Document</strong>
+                    <span class="upload-text">PDF or TXT</span>
+                    <input type="file" id="file-upload" accept=".pdf,.txt" style="display: none;">
+                    <div id="file-name"
+                        style="margin-top: 12px; font-size: 13px; color: var(--md-sys-color-primary); font-weight: 500;">
+                    </div>
+                </label>
+            </div>
+
+            <button id="ingest-btn" class="btn btn-filled" style="width: 100%;" disabled>
+                <span class="material-symbols-rounded">analytics</span>
+                Analyze Document
+            </button>
+
+            <!-- Model Selection -->
+            <div class="model-selector" style="margin-top: 20px;">
+                <label
+                    style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--md-sys-color-on-surface);">Select
+                    AI Model:</label>
+                <div class="select-wrapper" style="position: relative;">
+                    <select id="model-select"
+                        style="width: 100%; padding: 10px; border-radius: 8px; background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); border: 1px solid var(--md-sys-color-outline-variant); appearance: none; font-family: inherit;">
+                        <option value="llama3">Llama 3 (Smart)</option>
+                        <option value="mistral">Mistral (Balanced)</option>
+                        <option value="phi3">Phi-3 (Fast)</option>
+                    </select>
+                    <span class="material-symbols-rounded"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--md-sys-color-on-surface);">expand_more</span>
+                </div>
+            </div>
+
+            <div style="margin-top: auto; color: var(--md-sys-color-outline); font-size: 12px; text-align: center;">
+                Powered by LangGraph & Ollama
+            </div>
+        </aside>
+
+        <!-- Main Chat -->
+        <main class="chat-main">
+            <header class="chat-header">
+                <div style="font-weight: 500; font-size: 18px;">
+                    Multi-Agent Assistant
+                </div>
+                <div class="agent-status">
+                    <div class="status-dot"></div>
+                    Systems Operational
+                </div>
+            </header>
+
+            <div class="messages-list" id="messages">
+                <!-- Welcome Message -->
+                <div class="message ai">
+                    <div class="avatar ai"><span class="material-symbols-rounded">smart_toy</span></div>
+                    <div class="message-content">
+                        Hello! I am a **Multi-Agent System** designed to help you.
+
+                        I can:
+                        1. Search the web for real-time info.
+                        2. Write and execute Python code.
+                        3. Answer questions from your uploaded documents.
+
+                        How can I assist you today?
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="input-box">
+                    <input type="text" id="chat-input" class="chat-input"
+                        placeholder="Ask anything (e.g., 'Latest Bitcoin price?', 'Summarize PDF')" autocomplete="off">
+                    <button id="send-btn" class="send-btn-fab" disabled>
+                        <span class="material-symbols-rounded">arrow_upward</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // DOM Elements
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-upload');
+        const fileNameDisplay = document.getElementById('file-name');
+        const ingestBtn = document.getElementById('ingest-btn');
+        const messagesContainer = document.getElementById('messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // --- File Upload Logic ---
+        function updateFileUI(file) {
+            fileNameDisplay.textContent = file.name;
+            ingestBtn.disabled = false;
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) updateFileUI(e.target.files[0]);
+        });
+
+        // Drag & Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateFileUI(e.dataTransfer.files[0]);
+            }
+        });
+
+        // Ingest Button
+        ingestBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const originalText = ingestBtn.innerHTML;
+            ingestBtn.innerHTML = '<span class="material-symbols-rounded">sync</span> Processing...';
+            ingestBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/ingest', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (res.ok) {
+                    addMessage('ai', `✅ **Document Ingested!**\nFilename: ${data.filename}\nChunks: ${data.chunks_count}`);
+                } else {
+                    addMessage('ai', `❌ **Error:** ${data.detail}`);
+                }
+            } catch (err) {
+                addMessage('ai', `❌ **Network Error:** ${err.message}`);
+            } finally {
+                ingestBtn.innerHTML = originalText;
+                ingestBtn.disabled = false;
+            }
+        });
+
+        // --- Chat Logic ---
+        function addMessage(sender, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+
+            // Avatar
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = `avatar ${sender}`;
+            avatarDiv.innerHTML = `<span class="material-symbols-rounded">${sender === 'ai' ? 'smart_toy' : 'person'}</span>`;
+
+            // Content
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerText = text; // Secure text insertion
+
+            if (sender === 'user') {
+                msgDiv.appendChild(contentDiv);
+                msgDiv.appendChild(avatarDiv);
+            } else {
+                msgDiv.appendChild(avatarDiv);
+                msgDiv.appendChild(contentDiv);
+            }
+
+            messagesContainer.appendChild(msgDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return contentDiv;
+        }
+
+        function addLoadingIndicator() {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ai';
+            msgDiv.id = 'loading-msg';
+
+            msgDiv.innerHTML = `
+                <div class="avatar ai"><span class="material-symbols-rounded">smart_toy</span></div>
+                <div class="message-content">
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                </div>
+            `;
+            messagesContainer.appendChild(msgDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return msgDiv;
+        }
+
+        async function sendMessage() {
+            const query = chatInput.value.trim();
+            const model = document.getElementById('model-select').value;
+            if (!query) return;
+
+            // Clear input & User Message
+            chatInput.value = '';
+            sendBtn.disabled = true;
+            addMessage('user', query);
+
+            // AI Thinking
+            const loadingMsg = addLoadingIndicator();
+
+            try {
+                const res = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query, model: model })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    loadingMsg.remove();
+                    addMessage('ai', data.answer);
+                } else {
+                    const err = await res.json();
+                    loadingMsg.remove();
+                    addMessage('ai', `❌ **System Error:** ${err.detail}`);
+                }
+            } catch (err) {
+                loadingMsg.remove();
+                addMessage('ai', "❌ **Connection Error:** Ensure the server is running.");
+            } finally {
+                // Re-validate input state if needed, though button stays disabled if empty
+            }
+        }
+
+        chatInput.addEventListener('input', () => {
+            sendBtn.disabled = !chatInput.value.trim();
+        });
+
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+
+    </script>
+</body>
+
+</html>
