@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# IntelliJ / VSCode
+.idea/
+.vscode/
+
+# Project Data
+data/
+*.log
+*.sqlite
+test_doc.txt
+
+# Artifacts
+.gemini/
