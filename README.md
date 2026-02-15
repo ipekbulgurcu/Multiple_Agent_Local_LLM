@@ -73,17 +73,6 @@ Uygulamanız **http://127.0.0.1:8000** adresinde yayında olacaktır.
 <img width="2868" height="1522" alt="llm" src="https://github.com/user-attachments/assets/1a6516d7-1b6f-4d58-bf81-d96610499320" />
 
 
-##  Testler
-
-API'yi test etmek için `/ask` endpoint'ine şu JSON ile POST isteği atabilirsiniz:
-
-```json
-{
-  "query": "Who is the CEO of Apple and what is the current stock price?"
-}
-```
-*Sistem önce internetten CEO bilgisini bulacak, sonra borsa verisini çekecek ve birleştirip size sunacaktır.*
-
 ---
 **Geliştirici:** İpek Bulgurcu
 
